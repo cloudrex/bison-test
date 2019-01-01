@@ -17,18 +17,36 @@
 %token out
 %token let
 %token exit_cmd
+%token method_def
+%token method_params
+%token block_open
+%token block_close
+%token namespace_def
+%token attribute_def
+%token name
 %token <num> number
 %token <id> identifier
 %type <num> line exp term
 %type <id> assignment
 
 %%
-line : assignment ';' { ; }
-     | exit_cmd ';' { exit(EXIT_SUCCESS); }
-     | out exp ';' { printf("%d\n", $2); }
-     | line assignment ';' { ; }
-     | line out exp ';' { printf("%d\n", $3); }
-     | line exit_cmd ';' { exit(EXIT_SUCCESS); }
+method : method_def method_params block_open block_close { printf("empty method declaration\n"); }
+       | method_def method_params block_open statement block_close { printf("method declaration\n"); }
+       | attribute_def method { printf("method attribute\n"); }
+       ;
+
+namespace : namespace_def name block_open block_close { printf("empty namespace declaration\n"); }
+          | namespace_def name block_open method block_close { printf("namespace declaration\n"); }
+          ;
+
+statement : assignment ';' { ; }
+          | exit_cmd ';' { exit(EXIT_SUCCESS); }
+          | out exp ';' { printf("%d\n", $2); }
+          | out term ';' { printf("%d\n", $2); }
+          ;
+
+line : namespace { ; }
+     | line namespace { ; }
      ;
 
 assignment : let identifier '=' exp { updateSymbolVal($2, $4); }

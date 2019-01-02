@@ -19,6 +19,7 @@
 "let" { return let_key; }
 "exit" { return exit_key; }
 "throw" { return throw_key; }
+"import" { return import_key; }
 string|int|double|dynamic|void { return primitive; }
 public|protected|private { return access_mod; }
 \[[a-zA-Z_]+\] { return method_exten; }

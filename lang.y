@@ -39,10 +39,14 @@
 %token exit_key
 %token return_key
 %token yield_key
+%token import_key
 %type <num> line exp term number
 %type <str> assignment name
 
 %%
+import : import_key name ';' { ; }
+       ;
+
 class_bare : access_mod class_def name block_open block_close { ; }
            | access_mod class_def name block_open method block_close { ; }
            ;
@@ -76,6 +80,7 @@ statement : assignment ';' { ; }
 
 line : namespace { ; }
      | line namespace { ; }
+     | import { ; }
      ;
 
 assignment : let_key name '=' exp { updateSymbolVal($2, $4); }

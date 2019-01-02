@@ -22,8 +22,8 @@
 string|int|double|dynamic|void { return primitive; }
 public|protected|private { return access_mod; }
 \[[a-zA-Z_]+\] { return method_exten; }
-\&[a-zA-Z]+ { return attribute_def; }
-\@[a-zA-Z]+ { return method_def; }
+\&[a-zA-Z]+[a-zA-Z0-9_] { return attribute_def; }
+\@[a-zA-Z]+[a-zA-Z0-9_] { return method_def; }
 \([a-zA-Z0-9,\n\t ]*\) { return method_params; }
 [a-zA-Z]+[a-zA-Z0-9_]* { yylval.str = strdup(yytext); return name; }
 [0-9]+ { yylval.num = atoi(yytext); return number; }

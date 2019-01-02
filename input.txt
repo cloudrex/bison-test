@@ -1,8 +1,25 @@
 namespace testNamespace {
+    public class testClass {
+        &testAttribute
+        public @testMethod ( ) : void {
+            let a = 5;
+        }
+    }
+}
+
+namespace testNamespace {
     &testAttribute1
     public class testClass {
-        &testAttribute2
-        public @testMethod ( ) : void {
+        &testAttribute2 public @testMethod (): string {
+            let a = 5;
+        }
+    }
+}
+
+namespace testNamespace {
+    &testAttribute1
+    public class testClass {
+        &testAttribute2 public [testExtension] @testMethod ():string {
             let a = 5;
         }
     }

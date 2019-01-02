@@ -51,10 +51,8 @@ class : class_bare { printf("class declaration\n"); }
       | attribute_def class_bare { printf("class with attribute declaration\n"); }
       ;
 
-method_bare : access_mod method_def method_params method_return primitive block_open block_close { printf("empty method declaration\n"); }
-            | access_mod method_def method_params method_return primitive block_open statement block_close { printf("method declaration\n"); }
-            | access_mod method_exten method_def method_params method_return primitive block_open block_close { printf("empty method with extension\n"); }
-            | access_mod method_exten method_def method_params method_return primitive block_open statement block_close { printf("method with extension\n"); }
+method_bare : access_mod method_def method_params method_return primitive block_open statement_block block_close { printf("method declaration\n"); }
+            | access_mod method_exten method_def method_params method_return primitive block_open statement_block block_close { printf("method with extension\n"); }
             ;
 
 method : method_bare { ; }
@@ -64,6 +62,11 @@ method : method_bare { ; }
 namespace : namespace_def name block_open block_close { printf("empty namespace declaration -> %s\n", $2); }
           | namespace_def name block_open class block_close { printf("namespace declaration\n"); }
           ;
+
+statement_block : %empty
+                | statement { ; }
+                | statement_block statement { ; }
+                ;
 
 statement : assignment ';' { ; }
           | exit_key ';' { exit(EXIT_SUCCESS); }

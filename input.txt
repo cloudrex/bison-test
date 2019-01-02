@@ -4,7 +4,7 @@ namespace testNamespace {
     public class testClass {
         &testAttribute
         public @testMethod ( ) : void {
-            let a = 5;
+            exit;
         }
     }
 }

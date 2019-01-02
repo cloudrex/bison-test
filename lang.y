@@ -76,6 +76,8 @@ statement : assignment ';' { ; }
           | exit_key ';' { exit(EXIT_SUCCESS); }
           | out_key exp ';' { printf("%d\n", $2); }
           | out_key term ';' { printf("%d\n", $2); }
+          | throw_key exp ';' { exit(1); }
+          | throw_key name ';' { exit(1); }
           ;
 
 line : namespace { ; }

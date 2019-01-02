@@ -1,0 +1,9 @@
+namespace testNamespace {
+    &testAttribute1
+    public class testClass {
+        &testAttribute2
+        public @testMethod ( ) : void {
+            let a = 5;
+        }
+    }
+}

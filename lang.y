@@ -5,51 +5,77 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <ctype.h>
+    #include <string.h>
 
-    int symbols[52];
+    extern FILE * yyin;
 
-    int symbolVal(char symbol);
-    void updateSymbolVal(char symbol, int value);
+    int symbols[100];
+    int range = 100;
+
+    int symbolVal(char* symbol);
+    void updateSymbolVal(char* symbol, int value);
 %}
 
-%union { int num; char id; }
+%union { int num; char* str; }
 %start line
-%token out
-%token let
-%token exit_cmd
 %token method_def
 %token method_params
+%token method_return
+%token method_exten
 %token block_open
 %token block_close
 %token namespace_def
 %token attribute_def
+%token class_def
+%token access_mod
 %token name
-%token <num> number
-%token <id> identifier
-%type <num> line exp term
-%type <id> assignment
+%token primitive
+%token number
+%token if_key
+%token else_key
+%token throw_key
+%token out_key
+%token let_key
+%token exit_key
+%token return_key
+%token yield_key
+%type <num> line exp term number
+%type <str> assignment name
 
 %%
-method : method_def method_params block_open block_close { printf("empty method declaration\n"); }
-       | method_def method_params block_open statement block_close { printf("method declaration\n"); }
-       | attribute_def method { printf("method attribute\n"); }
+class_bare : access_mod class_def name block_open block_close { ; }
+           | access_mod class_def name block_open method block_close { ; }
+           ;
+
+class : class_bare { printf("class declaration\n"); }
+      | attribute_def class_bare { printf("class with attribute declaration\n"); }
+      ;
+
+method_bare : access_mod method_def method_params method_return primitive block_open block_close { printf("empty method declaration\n"); }
+            | access_mod method_def method_params method_return primitive block_open statement block_close { printf("method declaration\n"); }
+            | access_mod method_exten method_def method_params method_return primitive block_open block_close { printf("empty method with extension\n"); }
+            | access_mod method_exten method_def method_params method_return primitive block_open statement block_close { printf("method with extension\n"); }
+            ;
+
+method : method_bare { ; }
+       | attribute_def method_bare { ; }
        ;
 
-namespace : namespace_def name block_open block_close { printf("empty namespace declaration\n"); }
-          | namespace_def name block_open method block_close { printf("namespace declaration\n"); }
+namespace : namespace_def name block_open block_close { printf("empty namespace declaration -> %s\n", $2); }
+          | namespace_def name block_open class block_close { printf("namespace declaration\n"); }
           ;
 
 statement : assignment ';' { ; }
-          | exit_cmd ';' { exit(EXIT_SUCCESS); }
-          | out exp ';' { printf("%d\n", $2); }
-          | out term ';' { printf("%d\n", $2); }
+          | exit_key ';' { exit(EXIT_SUCCESS); }
+          | out_key exp ';' { printf("%d\n", $2); }
+          | out_key term ';' { printf("%d\n", $2); }
           ;
 
 line : namespace { ; }
      | line namespace { ; }
      ;
 
-assignment : let identifier '=' exp { updateSymbolVal($2, $4); }
+assignment : let_key name '=' exp { updateSymbolVal($2, $4); }
            ;
 
 exp : term { $$ = $1; }
@@ -60,34 +86,35 @@ exp : term { $$ = $1; }
     ;
 
 term : number { $$ = $1; }
-     | identifier { $$ = symbolVal($1); }
+     | name { $$ = symbolVal($1); }
      ;
 %%
 
-int computeSymbolIndex(char token)
+// TODO: Need to handle collisions
+int computeIndex(char* input)
 {
-    int index = -1;
-
-    if (islower(token)) {
-        index = token - 'a' + 26;
+    int index = 0;
+    int i;
+    
+    for (i = 0; i < strlen(input); i++) {
+        index += input[i] - 'a';
     }
-    else if (isupper(token)) {
-        index = token - 'A';
-    }
-
-    return index;
+    
+    return index % range;
 }
 
-int symbolVal(char symbol)
+int symbolVal(char* symbol)
 {
-    int bucket = computeSymbolIndex(symbol);
+    int bucket = computeIndex(symbol);
 
     return symbols[bucket];
 }
 
-void updateSymbolVal(char symbol, int value)
+void updateSymbolVal(char* symbol, int value)
 {
-    int bucket = computeSymbolIndex(symbol);
+    int bucket = computeIndex(symbol);
+
+    printf("Save new value at index %d\n", bucket);
 
     symbols[bucket] = value;
 }
@@ -95,9 +122,22 @@ void updateSymbolVal(char symbol, int value)
 int main(void) {
     int i;
 
-    for (i = 0; i < 52; i++) {
+    for (i = 0; i < 100; i++) {
         symbols[i] = 0;
     }
+
+    // Load & parse input file
+    FILE* inputFile = fopen("input.txt", "r");
+
+    if (inputFile == NULL) {
+        printf("Input file does not exist");
+
+        return 1;
+    }
+
+    yyin = inputFile;
+
+    //yylex();
 
     return yyparse();
 }
